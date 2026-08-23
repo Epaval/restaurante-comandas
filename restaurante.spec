@@ -1,28 +1,28 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import collect_submodules, collect_data_files
 
-hiddenimports = (
-    ['environ', 'django_environ', 'environ.environ']
-    + collect_submodules('django')
+# Lista explícita de módulos críticos de Django y tu proyecto
+hiddenimports = [
+    'environ', 'django_environ', 'environ.environ',
+    # Forzamos la inclusión de la carpeta config y sus archivos clave
+    'config', 'config.settings', 'config.urls', 'config.wsgi', 'config.asgi',
+    'django.contrib.auth.backends.ModelBackend',
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.core.cache.backends.locmem.LocMemCache',
+    'django.template.context_processors.debug',
+    'django.template.context_processors.request',
+    'django.template.context_processors.auth',
+    'django.template.context_processors.messages',
+    'PIL', 'PIL.Image',
+] + (
+    collect_submodules('django')
     + collect_submodules('axes')
     + collect_submodules('simple_history')
     + collect_submodules('whitenoise')
     + collect_submodules('waitress')
-    + collect_submodules('config')  # <-- AGREGADO: Fuerza a incluir toda la carpeta config
-    + [
-        'django.contrib.auth.backends.ModelBackend',
-        'django.contrib.auth.hashers.Argon2PasswordHasher',
-        'django.contrib.auth.hashers.PBKDF2PasswordHasher',
-        'django.core.cache.backends.locmem.LocMemCache',
-        'django.template.context_processors.debug',
-        'django.template.context_processors.request',
-        'django.template.context_processors.auth',
-        'django.template.context_processors.messages',
-        'PIL', 'PIL.Image',
-    ]
 )
 
-# Solo carpetas con archivos NO-Python (plantillas, estáticos, íconos)
 datas = [
     ('templates', 'templates'),
     ('static', 'static'),
