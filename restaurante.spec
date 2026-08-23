@@ -21,17 +21,11 @@ hiddenimports = (
     ]
 )
 
+# Solo incluir carpetas que REALMENTE existen en la raíz del repositorio
 datas = [
     ('templates', 'templates'),
     ('static', 'static'),
     ('icons', 'icons'),
-    ('config', 'config'),  # <-- AGREGAR: carpeta de configuración de Django
-    ('accounts', 'accounts'),  # <-- AGREGAR si tiene templates/static
-    ('pedidos', 'pedidos'),  # <-- AGREGAR si tiene templates/static
-    ('mesas', 'mesas'),  # <-- AGREGAR si tiene templates/static
-    ('menu', 'menu'),  # <-- AGREGAR si tiene templates/static
-    ('core', 'core'),  # <-- AGREGAR si tiene templates/static
-    ('dashboard', 'dashboard'),  # <-- AGREGAR si tiene templates/static
 ]
 
 a = Analysis(

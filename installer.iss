@@ -11,7 +11,6 @@ SolidCompression=yes
 PrivilegesRequired=lowest
 WizardStyle=modern
 
-
 [Languages]
 Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
 
