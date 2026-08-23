@@ -1,4 +1,4 @@
-# desktop/launcher.py
+# desktop/launcher.py (versión mejorada)
 import os
 import sys
 import traceback
@@ -13,9 +13,31 @@ def get_base_dir():
     else:
         return Path(__file__).resolve().parent.parent
 
+def create_default_superuser_if_needed():
+    """Crea un superusuario por defecto si no hay ningún usuario."""
+    try:
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        
+        # Si no hay ningún usuario, crear uno por defecto
+        if User.objects.count() == 0:
+            print("⚠️  No hay usuarios. Creando superusuario por defecto...")
+            User.objects.create_superuser(
+                username='admin',
+                email='admin@restaurante.com',
+                password='admin123',
+                rol='admin'  # Ajusta según tu modelo de Usuario
+            )
+            print("✅ Superusuario creado:")
+            print("   Usuario: admin")
+            print("   Contraseña: admin123")
+            print("   ⚠️  CAMBIA LA CONTRASEÑA DESPUÉS DE INGRESAR!")
+    except Exception as e:
+        print(f"⚠️  No se pudo crear superusuario automático: {e}")
+
 def main():
     try:
-        # MODO MANTENIMIENTO: Si se pasa un argumento (ej: Restaurante.exe migrate)
+        # MODO MANTENIMIENTO
         if len(sys.argv) > 1:
             from django.core.management import execute_from_command_line
             os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
@@ -24,7 +46,7 @@ def main():
             execute_from_command_line(sys.argv)
             sys.exit(0)
 
-        # MODO NORMAL: Iniciar servidor
+        # MODO NORMAL
         os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
         base_dir = get_base_dir()
         sys.path.insert(0, str(base_dir))
@@ -33,12 +55,14 @@ def main():
 
         from django.core.management import execute_from_command_line
         
-        # 1. Aplicar migraciones automáticamente al iniciar (seguro y rápido si ya están aplicadas)
         print("Verificando y aplicando migraciones de la base de datos...")
         execute_from_command_line(['manage.py', 'migrate', '--noinput'])
 
         import django
         django.setup()
+
+        # Crear superusuario por defecto si no hay ninguno
+        create_default_superuser_if_needed()
 
         from waitress import serve
         from config.wsgi import application
@@ -46,7 +70,6 @@ def main():
         print("✅ Servidor iniciado en http://127.0.0.1:8000")
         print("🌐 Abriendo navegador automáticamente...")
         
-        # 2. Abrir el navegador después de un breve retraso
         time.sleep(1.5)
         webbrowser.open('http://127.0.0.1:8000')
 

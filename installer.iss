@@ -1,11 +1,11 @@
 [Setup]
 AppName=RestauranteApp
-AppVersion=1.0.18
+AppVersion=1.0.19
 AppPublisher=FACDIN
 DefaultDirName={autopf}\Restaurante
-DefaultGroupName=FACDIN Facturación
+DefaultGroupName=FACDIN Restaurante
 OutputDir=instalador
-OutputBaseFilename=FACDIN-Restaurante-Setup-1.0.18
+OutputBaseFilename=FACDIN-Restaurante-Setup-1.0.19
 Compression=lzma2/max
 SolidCompression=yes
 PrivilegesRequired=lowest
@@ -24,21 +24,21 @@ Source: "icons\*"; DestDir: "{app}\icons"; Flags: ignoreversion recursesubdirs
 Source: "crear_admin.bat"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\Facturación"; Filename: "{app}\Restaurante.exe"; IconFilename: "{app}\icons\icono.ico"; Check: NotIsEstacion
-Name: "{group}\Facturación Servidor (red)"; Filename: "{app}\Restaurante.exe"; Parameters: "--lan --sin-ventana"; IconFilename: "{app}\icons\icono_servidor.ico"; Check: IsServidor
-Name: "{group}\Facturación Estación"; Filename: "{app}\Restaurante.exe"; Parameters: "--conectar"; IconFilename: "{app}\icons\icono.ico"; Check: IsEstacion
+Name: "{group}\Restaurante"; Filename: "{app}\Restaurante.exe"; IconFilename: "{app}\icons\icono.ico"; Check: NotIsEstacion
+Name: "{group}\Restaurante Servidor (red)"; Filename: "{app}\Restaurante.exe"; Parameters: "--lan --sin-ventana"; IconFilename: "{app}\icons\icono_servidor.ico"; Check: IsServidor
+Name: "{group}\Restaurante Estación"; Filename: "{app}\Restaurante.exe"; Parameters: "--conectar"; IconFilename: "{app}\icons\icono.ico"; Check: IsEstacion
 Name: "{group}\Crear Superusuario (Admin)"; Filename: "{app}\crear_admin.bat"; IconFilename: "{app}\icons\icono.ico"
 
-Name: "{autodesktop}\Facturación"; Filename: "{app}\Restaurante.exe"; Tasks: desktopicon; IconFilename: "{app}\icons\icono.ico"; Check: NotIsEstacion
-Name: "{autodesktop}\Facturación Servidor"; Filename: "{app}\Restaurante.exe"; Parameters: "--lan --sin-ventana"; Tasks: desktopicon; IconFilename: "{app}\icons\icono_servidor.ico"; Check: IsServidor
-Name: "{autodesktop}\Facturación Estación"; Filename: "{app}\Restaurante.exe"; Parameters: "--conectar"; Tasks: desktopicon; IconFilename: "{app}\icons\icono.ico"; Check: IsEstacion
+Name: "{autodesktop}\Restaurante"; Filename: "{app}\Restaurante.exe"; Tasks: desktopicon; IconFilename: "{app}\icons\icono.ico"; Check: NotIsEstacion
+Name: "{autodesktop}\Restaurante Servidor"; Filename: "{app}\Restaurante.exe"; Parameters: "--lan --sin-ventana"; Tasks: desktopicon; IconFilename: "{app}\icons\icono_servidor.ico"; Check: IsServidor
+Name: "{autodesktop}\Restaurante Estación"; Filename: "{app}\Restaurante.exe"; Parameters: "--conectar"; Tasks: desktopicon; IconFilename: "{app}\icons\icono.ico"; Check: IsEstacion
 
-Name: "{userstartup}\Facturación Servidor"; Filename: "{app}\Restaurante.exe"; Parameters: "--lan --sin-ventana"; Tasks: autoiniciar; IconFilename: "{app}\icons\icono_servidor.ico"; Check: IsServidor
+Name: "{userstartup}\Restaurante Servidor"; Filename: "{app}\Restaurante.exe"; Parameters: "--lan --sin-ventana"; Tasks: autoiniciar; IconFilename: "{app}\icons\icono_servidor.ico"; Check: IsServidor
 
 [Run]
 Filename: "netsh"; Parameters: "advfirewall firewall add rule name=""Restaurante Web"" dir=in action=allow program=""{app}\Restaurante.exe"" enable=yes"; Flags: runhidden; Check: IsServidor
-Filename: "{app}\Restaurante.exe"; Parameters: "--conectar"; Description: "Abrir Facturación Estación ahora"; Flags: nowait postinstall skipifsilent; Check: IsEstacion
-Filename: "{app}\Restaurante.exe"; Description: "Abrir Facturación ahora"; Flags: nowait postinstall skipifsilent; Check: NotIsEstacion
+Filename: "{app}\Restaurante.exe"; Parameters: "--conectar"; Description: "Abrir Restaurante Estación ahora"; Flags: nowait postinstall skipifsilent; Check: IsEstacion
+Filename: "{app}\Restaurante.exe"; Description: "Abrir Restaurante ahora"; Flags: nowait postinstall skipifsilent; Check: NotIsEstacion
 
 [Code]
 var
