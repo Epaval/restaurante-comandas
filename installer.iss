@@ -1,11 +1,11 @@
 [Setup]
 AppName=RestauranteApp
-AppVersion=1.0.17
+AppVersion=1.0.18
 AppPublisher=FACDIN
 DefaultDirName={autopf}\Restaurante
 DefaultGroupName=FACDIN Facturación
 OutputDir=instalador
-OutputBaseFilename=FACDIN-Restaurante-Setup-1.0.17
+OutputBaseFilename=FACDIN-Restaurante-Setup-1.0.18
 Compression=lzma2/max
 SolidCompression=yes
 PrivilegesRequired=lowest
@@ -20,12 +20,14 @@ Name: "autoiniciar"; Description: "Iniciar servidor al encender Windows"; GroupD
 
 [Files]
 Source: "dist\Restaurante\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "icons\*.ico"; DestDir: "{app}\icons"; Flags: ignoreversion
+Source: "icons\*"; DestDir: "{app}\icons"; Flags: ignoreversion recursesubdirs
+Source: "crear_admin.bat"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\Facturación"; Filename: "{app}\Restaurante.exe"; IconFilename: "{app}\icons\icono.ico"; Check: NotIsEstacion
 Name: "{group}\Facturación Servidor (red)"; Filename: "{app}\Restaurante.exe"; Parameters: "--lan --sin-ventana"; IconFilename: "{app}\icons\icono_servidor.ico"; Check: IsServidor
 Name: "{group}\Facturación Estación"; Filename: "{app}\Restaurante.exe"; Parameters: "--conectar"; IconFilename: "{app}\icons\icono.ico"; Check: IsEstacion
+Name: "{group}\Crear Superusuario (Admin)"; Filename: "{app}\crear_admin.bat"; IconFilename: "{app}\icons\icono.ico"
 
 Name: "{autodesktop}\Facturación"; Filename: "{app}\Restaurante.exe"; Tasks: desktopicon; IconFilename: "{app}\icons\icono.ico"; Check: NotIsEstacion
 Name: "{autodesktop}\Facturación Servidor"; Filename: "{app}\Restaurante.exe"; Parameters: "--lan --sin-ventana"; Tasks: desktopicon; IconFilename: "{app}\icons\icono_servidor.ico"; Check: IsServidor

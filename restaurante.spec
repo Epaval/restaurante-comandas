@@ -26,7 +26,8 @@ hiddenimports = (
 
 datas = [
     ('templates', 'templates'),
-    ('static', 'static'),    
+    ('static', 'static'),
+    ('staticfiles', 'staticfiles'), 
     ('apps', 'apps'),
     ('config', 'config'),
     ('icons', 'icons'),
