@@ -1,4 +1,4 @@
-# desktop/launcher.py (versión mejorada)
+# desktop/launcher.py
 import os
 import sys
 import traceback
@@ -7,9 +7,16 @@ import time
 from pathlib import Path
 
 def get_base_dir():
-    """Obtiene el directorio base de la aplicación."""
+    """Obtiene el directorio base de la aplicación (código fuente congelado)."""
     if getattr(sys, 'frozen', False):
         return Path(sys._MEIPASS)
+    else:
+        return Path(__file__).resolve().parent.parent
+
+def get_app_data_dir():
+    """Obtiene el directorio de datos persistentes (BD, media, logs)."""
+    if getattr(sys, 'frozen', False):
+        return Path(sys.executable).parent  # Carpeta donde está el .exe
     else:
         return Path(__file__).resolve().parent.parent
 
@@ -19,7 +26,6 @@ def create_default_superuser_if_needed():
         from django.contrib.auth import get_user_model
         User = get_user_model()
         
-        # Si no hay ningún usuario, crear uno por defecto
         if User.objects.count() == 0:
             print("⚠️  No hay usuarios. Creando superusuario por defecto...")
             User.objects.create_superuser(
@@ -49,6 +55,7 @@ def main():
         # MODO NORMAL
         os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
         base_dir = get_base_dir()
+        app_data_dir = get_app_data_dir()
         sys.path.insert(0, str(base_dir))
         os.environ.setdefault('DJANGO_DEBUG', 'False')
         os.environ.setdefault('ALLOWED_HOSTS', 'localhost,127.0.0.1,*')
@@ -60,6 +67,13 @@ def main():
 
         import django
         django.setup()
+
+        # 🔥 CORRECCIÓN CRÍTICA PARA WINDOWS:
+        # Forzar que MEDIA_ROOT apunte a la carpeta del .exe, no a _internal
+        from django.conf import settings
+        settings.MEDIA_ROOT = app_data_dir / 'media'
+        settings.MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+        print(f"📁 MEDIA_ROOT configurado en: {settings.MEDIA_ROOT}")
 
         # Crear superusuario por defecto si no hay ninguno
         create_default_superuser_if_needed()
