@@ -8,6 +8,7 @@ hiddenimports = (
     + collect_submodules('simple_history')
     + collect_submodules('whitenoise')
     + collect_submodules('waitress')
+    + collect_submodules('config')  # <-- AGREGADO: Fuerza a incluir toda la carpeta config
     + [
         'django.contrib.auth.backends.ModelBackend',
         'django.contrib.auth.hashers.Argon2PasswordHasher',
@@ -21,7 +22,7 @@ hiddenimports = (
     ]
 )
 
-# Solo incluir carpetas que REALMENTE existen en la raíz del repositorio
+# Solo carpetas con archivos NO-Python (plantillas, estáticos, íconos)
 datas = [
     ('templates', 'templates'),
     ('static', 'static'),
