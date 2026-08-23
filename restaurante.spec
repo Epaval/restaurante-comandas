@@ -25,6 +25,13 @@ datas = [
     ('templates', 'templates'),
     ('static', 'static'),
     ('icons', 'icons'),
+    ('config', 'config'),  # <-- AGREGAR: carpeta de configuración de Django
+    ('accounts', 'accounts'),  # <-- AGREGAR si tiene templates/static
+    ('pedidos', 'pedidos'),  # <-- AGREGAR si tiene templates/static
+    ('mesas', 'mesas'),  # <-- AGREGAR si tiene templates/static
+    ('menu', 'menu'),  # <-- AGREGAR si tiene templates/static
+    ('core', 'core'),  # <-- AGREGAR si tiene templates/static
+    ('dashboard', 'dashboard'),  # <-- AGREGAR si tiene templates/static
 ]
 
 a = Analysis(
@@ -47,7 +54,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='Restaurante',  # <-- CAMBIADO: Ahora coincide con el COLLECT
+    name='Restaurante',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
