@@ -27,8 +27,7 @@ hiddenimports = (
 datas = [
     ('templates', 'templates'),
     ('static', 'static'),
-    ('icons', 'icons'),
-    ('media', 'media'),  # <-- Agregado por si usas archivos multimedia
+    ('icons', 'icons'),      
 ]
 
 a = Analysis(
