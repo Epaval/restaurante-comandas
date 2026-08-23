@@ -1,0 +1,62 @@
+name: Compilar instalador Windows
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Recolectar archivos estáticos
+        env:
+          DJANGO_DEBUG: "False"
+          DJANGO_SECRET_KEY: "clave-temporal-solo-para-build-de-empaquetado"
+        run: python manage.py collectstatic --noinput
+
+      - name: Compilar ejecutable con PyInstaller
+        run: pyinstaller restaurante.spec --noconfirm --clean
+
+      - name: Compilar instalador con Inno Setup
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+        with:
+          path: installer.iss
+
+      - name: Publicar instalador como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: RestauranteComandas-Instalador
+          path: instalador/*.exe
+          if-no-files-found: error
+
+      - name: Crear Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: instalador/*.exe
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

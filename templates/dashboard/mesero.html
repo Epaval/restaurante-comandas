@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block titulo %}Meseros{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina">
+  <div>
+    <h1>Mis pedidos activos</h1>
+    <p>Pedidos que ha tomado y siguen en curso.</p>
+  </div>
+  <a href="{% url 'pedidos:crear' %}" class="btn btn-verde">+ Nuevo pedido</a>
+</div>
+
+<div class="rejilla rejilla-3">
+  {% for pedido in pedidos %}
+    <a href="{% url 'pedidos:detalle' pedido.id %}" class="ticket" style="text-decoration:none; color:inherit;">
+      <div class="ticket__cabeza">
+        <div>
+          <div class="ticket__num">#{{ pedido.id }}</div>
+          <span class="chip-tipo {% if pedido.tipo == 'delivery' %}chip-delivery{% else %}chip-insitu{% endif %}">
+            {{ pedido.get_tipo_display }}
+          </span>
+        </div>
+        <span class="badge badge-gris">{{ pedido.get_estado_display }}</span>
+      </div>
+      <div class="ticket__cuerpo">
+        <p style="margin:0;">
+          {% if pedido.mesa %}Mesa {{ pedido.mesa.numero }}{% else %}{{ pedido.cliente_nombre|default:"Sin nombre" }}{% endif %}
+        </p>
+        <p style="margin:0.3rem 0 0; color: var(--tinta-suave); font-size:0.85rem;">{{ pedido.items.count }} producto(s)</p>
+      </div>
+    </a>
+  {% empty %}
+    <p class="vacio">No tiene pedidos activos. Cree uno nuevo para comenzar.</p>
+  {% endfor %}
+</div>
+{% endblock %}

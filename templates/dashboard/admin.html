@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block titulo %}Panel administrador{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina">
+  <div>
+    <h1>Panel general</h1>
+    <p>Resumen de la operación de hoy.</p>
+  </div>
+</div>
+
+<div class="stats-admin">
+  <div class="tarjeta"><strong>{{ pedidos_hoy }}</strong><span>Pedidos hoy</span></div>
+  <div class="tarjeta"><strong>${{ ventas_hoy }}</strong><span>Ventas cobradas hoy</span></div>
+  <div class="tarjeta"><strong>{{ pedidos_activos }}</strong><span>Pedidos activos</span></div>
+  <div class="tarjeta"><strong>{{ mesas_disponibles }}/{{ mesas_total }}</strong><span>Mesas disponibles</span></div>
+</div>
+
+<div class="rejilla rejilla-2">
+  <div class="tarjeta">
+    <h3>Pedidos por estado (hoy)</h3>
+    <table>
+      <thead><tr><th>Estado</th><th>Cantidad</th></tr></thead>
+      <tbody>
+        {% for fila in por_estado %}
+          <tr><td>{{ fila.estado }}</td><td>{{ fila.total }}</td></tr>
+        {% empty %}
+          <tr><td colspan="2">Sin pedidos aún.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tarjeta">
+    <h3>Últimos pedidos</h3>
+    <table>
+      <thead><tr><th>#</th><th>Tipo</th><th>Destino</th><th>Estado</th></tr></thead>
+      <tbody>
+        {% for pedido in ultimos_pedidos %}
+          <tr>
+            <td><a href="{% url 'pedidos:detalle' pedido.id %}">#{{ pedido.id }}</a></td>
+            <td>{{ pedido.get_tipo_display }}</td>
+            <td>{% if pedido.mesa %}Mesa {{ pedido.mesa.numero }}{% else %}{{ pedido.cliente_nombre|default:"Delivery" }}{% endif %}</td>
+            <td><span class="badge badge-gris">{{ pedido.get_estado_display }}</span></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4">Sin pedidos todavía.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="fila" style="margin-top:1.5rem;">
+  <a class="btn btn-verde" href="{% url 'admin:menu_producto_changelist' %}">Gestionar menú</a>
+  <a class="btn btn-cobre" href="{% url 'admin:mesas_mesa_changelist' %}">Gestionar mesas</a>
+  <a class="btn btn-outline" href="{% url 'admin:accounts_usuario_changelist' %}">Gestionar personal</a>
+</div>
+{% endblock %}

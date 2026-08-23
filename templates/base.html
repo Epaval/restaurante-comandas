@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Restaurante{% endblock %} · Comandas</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body {% block body_attrs %}{% endblock %}>
+<div class="app-shell">
+  <header class="topbar">
+    <div class="topbar__marca"><span class="punto"></span> Comandas del Restaurante</div>
+    {% if user.is_authenticated %}
+    <nav class="topbar__nav">
+      {% if user.is_superuser or user.es_admin %}
+        <a href="{% url 'dashboard:admin' %}" class="{% if request.resolver_match.url_name == 'admin' %}activo{% endif %}">Panel</a>
+      {% endif %}
+      
+      {% if user.es_mesero or user.es_admin or user.is_superuser %}
+        <a href="{% url 'dashboard:mesero' %}" class="{% if request.resolver_match.url_name == 'mesero' %}activo{% endif %}">Meseros</a>
+        <a href="{% url 'pedidos:crear' %}" class="{% if request.resolver_match.url_name == 'crear' %}activo{% endif %}">Nuevo pedido</a>
+      {% endif %}
+      
+      {% if user.es_cocina or user.es_admin or user.is_superuser %}
+        <a href="{% url 'dashboard:cocina' %}" class="{% if request.resolver_match.url_name == 'cocina' %}activo{% endif %}">Cocina</a>
+      {% endif %}
+      
+      {% if user.es_caja or user.es_admin or user.is_superuser %}
+        <a href="{% url 'dashboard:caja' %}" class="{% if request.resolver_match.url_name == 'caja' %}activo{% endif %}">Caja</a>
+      {% endif %}
+      
+      {% if user.es_entrega or user.es_admin or user.is_superuser %}
+        <a href="{% url 'dashboard:entregas' %}" class="{% if request.resolver_match.url_name == 'entregas' %}activo{% endif %}">Entregas</a>
+      {% endif %}
+      
+      <!-- ✅ SOLO PARA LIMPIEZA -->
+      {% if user.es_limpieza or user.es_admin or user.is_superuser %}
+        <a href="{% url 'mesas:panel_limpieza' %}" class="{% if request.resolver_match.url_name == 'panel_limpieza' %}activo{% endif %}">
+          <i class="fas fa-broom"></i> Limpieza
+          {% if mesas_limpieza_count > 0 %}
+            <span class="badge bg-warning">{{ mesas_limpieza_count }}</span>
+          {% endif %}
+        </a>
+      {% endif %}
+      
+      <a href="{% url 'mesas:lista' %}" class="{% if request.resolver_match.url_name == 'lista' %}activo{% endif %}">Mesas</a>
+      
+      {% if user.is_superuser %}
+        <a href="{% url 'admin:index' %}">Administración Django</a>
+      {% endif %}
+    </nav>
+    <div class="topbar__usuario">
+      <span>{{ user.get_full_name|default:user.username }} · {{ user.get_rol_display }}</span>
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn-link">Salir</button>
+      </form>
+    </div>
+    {% endif %}
+  </header>
+
+  <main class="contenido">
+    {% if messages %}
+      <ul class="mensajes">
+        {% for message in messages %}
+          <li class="mensaje {{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% block contenido %}{% endblock %}
+  </main>
+</div>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

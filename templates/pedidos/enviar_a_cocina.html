@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block titulo %}Enviar pedido #{{ pedido.id }} a cocina{% endblock %}
+{% block contenido %}
+<div class="pedido-container" style="max-width: 600px; margin: 2rem auto;">
+  <div class="tarjeta">
+    <div class="tarjeta-header">
+      <h2>📤 Enviar pedido #{{ pedido.id }} a cocina</h2>
+    </div>
+    
+    <div style="padding: 1.5rem;">
+      <p style="margin-bottom: 1.5rem; color: #666;">
+        Antes de enviar a cocina, ingrese los datos del cliente:
+      </p>
+
+      <form method="post">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+          <div class="alerta-error">
+            {% for field, errors in form.errors.items %}
+              {% for error in errors %}
+                <p>{{ error }}</p>
+              {% endfor %}
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <div class="campo">
+          <label for="{{ form.cliente_nombre.id_for_label }}">
+            Nombre del cliente <span style="color: #f44336;">*</span>
+          </label>
+          {{ form.cliente_nombre }}
+        </div>
+
+        <div class="campo">
+          <label for="{{ form.cliente_telefono.id_for_label }}">
+            Teléfono <small style="color: #888;">(opcional)</small>
+          </label>
+          {{ form.cliente_telefono }}
+        </div>
+
+        <div class="resumen-pedido" style="background: #f9f9f9; padding: 1rem; border-radius: 8px; margin: 1.5rem 0;">
+          <h4 style="margin-top: 0;">Resumen del pedido</h4>
+          {% for item in pedido.items.all %}
+            <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+              <span>{{ item.cantidad }}× {{ item.producto.nombre }}</span>
+              <span>${{ item.subtotal }}</span>
+            </div>
+          {% endfor %}
+          <div style="display: flex; justify-content: space-between; padding-top: 0.75rem; font-weight: bold; font-size: 1.1rem;">
+            <span>Total:</span>
+            <span>${{ pedido.total }}</span>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem;">
+          <a href="{% url 'pedidos:detalle' pedido.id %}" class="btn btn-outline" style="flex: 1;">
+            ← Volver
+          </a>
+          <button type="submit" class="btn btn-verde" style="flex: 2;">
+             Enviar a cocina
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+  .alerta-error { background: #FFEBEE; color: #C62828; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
+  .campo { margin-bottom: 1rem; }
+  .campo label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+  .campo input { width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+  .campo input:focus { outline: none; border-color: #4CAF50; }
+  .btn { display: inline-block; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600; text-align: center; cursor: pointer; border: none; transition: all 0.2s; }
+  .btn-verde { background: #4CAF50; color: white; }
+  .btn-verde:hover { background: #45a049; }
+  .btn-outline { background: white; color: #666; border: 2px solid #e0e0e0; }
+  .btn-outline:hover { background: #f5f5f5; }
+</style>
+{% endblock %}

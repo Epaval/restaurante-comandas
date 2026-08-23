@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Mesas - Restaurante{% endblock %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <div class="encabezado-pagina">
+        <div>
+            <h1><i class="fas fa-chair"></i> Mesas</h1>
+            <p class="text-muted">Disponibilidad del salón en tiempo real. Haz clic en una mesa disponible para comenzar un pedido.</p>
+        </div>
+        <div>
+            <a href="{% url 'dashboard:inicio' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+
+    <div class="resumen-mesas mb-4">
+        <div class="stat-card stat-disponible">
+            <i class="fas fa-check-circle"></i>
+            <div>
+                <strong>{{ disponibles }}</strong>
+                <span>Disponibles</span>
+            </div>
+        </div>
+        <div class="stat-card stat-ocupada">
+            <i class="fas fa-times-circle"></i>
+            <div>
+                <strong>{{ ocupadas }}</strong>
+                <span>Ocupadas</span>
+            </div>
+        </div>
+        <div class="stat-card stat-total">
+            <i class="fas fa-chair"></i>
+            <div>
+                <strong>{{ mesas|length }}</strong>
+                <span>Total</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="rejilla-mesas">
+        {% for mesa in mesas %}
+            <div class="mesa-tile estado-{{ mesa.estado }}"
+                 data-mesa-id="{{ mesa.id }}"
+                 data-estado="{{ mesa.estado }}">
+                
+                <div class="mesa-tile__contenido">
+                    <div class="mesa-tile__numero">{{ mesa.numero }}</div>
+                    <div class="mesa-tile__cap">
+                        <i class="fas fa-users"></i> {{ mesa.capacidad }} personas
+                    </div>
+                    <span class="badge {{ mesa.badge_class }}">
+                        {{ mesa.get_estado_display }}
+                    </span>
+                    
+                    {% if mesa.estado == 'disponible' %}
+                        <div class="mesa-tile__accion">
+                            <i class="fas fa-plus-circle"></i> Tomar pedido
+                        </div>
+                    {% elif mesa.estado == 'ocupada' %}
+                        <div class="mesa-tile__accion">
+                            <i class="fas fa-arrow-right"></i> Ver pedido
+                        </div>
+                    {% elif mesa.estado == 'limpieza' %}
+                        <div class="mesa-tile__accion limpieza">
+                            <i class="fas fa-spinner fa-spin"></i> En limpieza
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% empty %}
+            <div class="vacio">
+                <i class="fas fa-chair fa-3x"></i>
+                <p>Aún no hay mesas registradas.</p>
+                <small>Agréguelas desde el panel de administración.</small>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .encabezado-pagina {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    .encabezado-pagina h1 {
+        margin: 0;
+        font-size: 2rem;
+    }
+    .encabezado-pagina p {
+        margin: 0.25rem 0 0 0;
+        color: #666;
+    }
+
+    .resumen-mesas {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    .stat-card {
+        background: white;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s;
+    }
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .stat-card i {
+        font-size: 2rem;
+    }
+    .stat-card strong {
+        display: block;
+        font-size: 1.8rem;
+        line-height: 1.2;
+    }
+    .stat-card span {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    .stat-disponible i { color: #4CAF50; }
+    .stat-ocupada i { color: #f44336; }
+    .stat-total i { color: #2196F3; }
+
+    .rejilla-mesas {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .mesa-tile {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        border-left: 4px solid #ccc;
+        transition: all 0.3s;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .mesa-tile:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+
+    .mesa-tile.estado-disponible {
+        border-left-color: #4CAF50;
+    }
+    .mesa-tile.estado-disponible:hover {
+        background: #f0faf0;
+    }
+
+    .mesa-tile.estado-ocupada {
+        border-left-color: #f44336;
+    }
+    .mesa-tile.estado-ocupada:hover {
+        background: #faf0f0;
+    }
+
+    .mesa-tile.estado-limpieza {
+        border-left-color: #FF9800;
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+    .mesa-tile.estado-limpieza:hover {
+        transform: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .mesa-tile.estado-reservada {
+        border-left-color: #2196F3;
+    }
+
+    .mesa-tile__contenido {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .mesa-tile__numero {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #333;
+        line-height: 1;
+    }
+
+    .mesa-tile__cap {
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .mesa-tile__cap i {
+        margin-right: 0.25rem;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    .badge-success { background: #4CAF50; color: white; }
+    .badge-danger { background: #f44336; color: white; }
+    .badge-warning { background: #FF9800; color: white; }
+    .badge-secondary { background: #9E9E9E; color: white; }
+    .badge-primary { background: #2196F3; color: white; }
+
+    .mesa-tile__accion {
+        margin-top: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        background: #f5f5f5;
+        color: #666;
+        transition: all 0.2s;
+        width: 100%;
+        text-align: center;
+    }
+
+    .mesa-tile.estado-disponible .mesa-tile__accion {
+        background: #4CAF50;
+        color: white;
+    }
+
+    .mesa-tile.estado-disponible .mesa-tile__accion:hover {
+        background: #45a049;
+        transform: scale(1.02);
+    }
+
+    .mesa-tile.estado-ocupada .mesa-tile__accion {
+        background: #f44336;
+        color: white;
+    }
+
+    .mesa-tile.estado-ocupada .mesa-tile__accion:hover {
+        background: #d32f2f;
+        transform: scale(1.02);
+    }
+
+    .mesa-tile.estado-limpieza .mesa-tile__accion.limpieza {
+        background: #FF9800;
+        color: white;
+        cursor: not-allowed;
+    }
+
+    .vacio {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 3rem;
+        color: #999;
+    }
+    .vacio i {
+        color: #ddd;
+        margin-bottom: 1rem;
+    }
+    .vacio p {
+        margin: 0.5rem 0;
+        font-size: 1.1rem;
+        color: #666;
+    }
+    .vacio small {
+        color: #999;
+    }
+
+    @media (max-width: 768px) {
+        .resumen-mesas {
+            grid-template-columns: 1fr;
+        }
+        .rejilla-mesas {
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        }
+        .encabezado-pagina {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const mesas = document.querySelectorAll('.mesa-tile');
+    
+    mesas.forEach(mesa => {
+        mesa.addEventListener('click', function(e) {
+            // Si la mesa está en limpieza, no hacer nada
+            if (this.classList.contains('estado-limpieza')) {
+                return;
+            }
+            
+            const mesaId = this.dataset.mesaId;
+            const estado = this.dataset.estado;
+            
+            // Redirigir a la URL de selección de mesa
+            window.location.href = `/mesas/seleccionar/${mesaId}/`;
+        });
+    });
+});
+</script>
+{% endblock %}

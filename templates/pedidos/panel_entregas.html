@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %}Entregas{% endblock %}
+{% block body_attrs %}data-auto-recarga="30"{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina">
+  <div>
+    <h1>Entregas</h1>
+    <p>Pedidos de delivery listos para salir o en camino.</p>
+  </div>
+</div>
+
+<div class="rejilla rejilla-3">
+  {% for pedido in pedidos %}
+    <div class="ticket">
+      <div class="ticket__cabeza">
+        <div>
+          <div class="ticket__num">#{{ pedido.id }}</div>
+          <div style="font-size:0.85rem; color:var(--tinta-suave);">{{ pedido.cliente_nombre }} · {{ pedido.cliente_telefono }}</div>
+        </div>
+        <span class="badge badge-gris">{{ pedido.get_estado_display }}</span>
+      </div>
+      <div class="ticket__cuerpo">
+        <p style="margin:0 0 0.5rem;"><strong>Dirección:</strong> {{ pedido.cliente_direccion }}</p>
+        <div class="pila">
+          {% for item in pedido.items.all %}
+            <div class="linea-item"><span>{{ item.cantidad }}× {{ item.producto.nombre }}</span></div>
+          {% endfor %}
+        </div>
+        <div class="total-linea"><span>Total</span><span>${{ pedido.total }}</span></div>
+      </div>
+      <div class="ticket__pie">
+        {% if pedido.estado == 'listo' %}
+          <form method="post" action="{% url 'pedidos:tomar_entrega' pedido.id %}" style="width:100%;">
+            {% csrf_token %}
+            <button class="btn btn-cobre btn-bloque" type="submit">Salir a entregar</button>
+          </form>
+        {% elif pedido.estado == 'en_camino' %}
+          <form method="post" action="{% url 'pedidos:marcar_entregado' pedido.id %}" style="width:100%;">
+            {% csrf_token %}
+            <button class="btn btn-verde btn-bloque" type="submit">Marcar entregado</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  {% empty %}
+    <p class="vacio">No hay pedidos de delivery en curso.</p>
+  {% endfor %}
+</div>
+{% endblock %}

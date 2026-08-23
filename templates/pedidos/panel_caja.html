@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %}Caja{% endblock %}
+{% block body_attrs %}data-auto-recarga="30"{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina">
+  <div>
+    <h1>Caja</h1>
+    <p>Pedidos del salón listos para cobrar.</p>
+  </div>
+</div>
+
+<div class="rejilla rejilla-3">
+  {% for pedido in pedidos %}
+    <div class="ticket">
+      <div class="ticket__cabeza">
+        <div>
+          <div class="ticket__num">#{{ pedido.id }}</div>
+          <div style="font-size:0.85rem; color:var(--tinta-suave);">
+            {% if pedido.mesa %}Mesa {{ pedido.mesa.numero }}{% else %}{{ pedido.cliente_nombre }}{% endif %}
+          </div>
+        </div>
+        <span class="badge badge-gris">{{ pedido.get_estado_display }}</span>
+      </div>
+      <div class="ticket__cuerpo">
+        <div class="pila">
+          {% for item in pedido.items.all %}
+            <div class="linea-item">
+              <span>{{ item.cantidad }}× {{ item.producto.nombre }}</span>
+              <span>${{ item.subtotal }}</span>
+            </div>
+          {% endfor %}
+        </div>
+        <div class="total-linea"><span>Total</span><span>${{ pedido.total }}</span></div>
+      </div>
+      <div class="ticket__pie">
+        <a href="{% url 'pedidos:detalle' pedido.id %}" class="btn btn-cobre btn-bloque">Ir a cobrar</a>
+      </div>
+    </div>
+  {% empty %}
+    <p class="vacio">No hay pedidos pendientes de cobro.</p>
+  {% endfor %}
+</div>
+{% endblock %}

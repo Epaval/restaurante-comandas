@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block titulo %}Panel de mesas{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina">
+  <h1>Panel de mesas</h1>
+  <p>Estado en tiempo real de todas las mesas</p>
+</div>
+
+<div class="mesas-grid">
+  {% for mesa in mesas %}
+    <div class="mesa-card mesa-card--{{ mesa.estado }}">
+      <div class="mesa-card__header">
+        <h3>Mesa {{ mesa.numero }}</h3>
+        <span class="mesa-card__estado">{{ mesa.get_estado_display }}</span>
+      </div>
+      
+      <div class="mesa-card__info">
+        <p>👥 Capacidad: {{ mesa.capacidad }} personas</p>
+        {% if mesa.ultimo_pedido %}
+          <p>📋 Pedido #{{ mesa.ultimo_pedido.id }}</p>
+          <p>👤 {{ mesa.ultimo_pedido.cliente_nombre }}</p>
+        {% endif %}
+        {% if mesa.solicitada_limpieza and mesa.limpieza_solicitada_en %}
+          <p>🧹 Limpieza solicitada: {{ mesa.limpieza_solicitada_en|timesince }} atrás</p>
+        {% endif %}
+      </div>
+
+      {% if mesa.estado == 'limpieza' %}
+        <a href="{% url 'pedidos:completar_limpieza' mesa.id %}" class="btn btn-verde btn-bloque">
+          ✅ Marcar limpieza completa
+        </a>
+      {% endif %}
+    </div>
+  {% empty %}
+    <p>No hay mesas registradas</p>
+  {% endfor %}
+</div>
+
+<style>
+  .mesas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+  .mesa-card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 6px solid #ccc; }
+  .mesa-card--disponible { border-left-color: #4CAF50; }
+  .mesa-card--ocupada { border-left-color: #FF9800; }
+  .mesa-card--limpieza { border-left-color: #2196F3; }
+  .mesa-card__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+  .mesa-card__header h3 { margin: 0; font-size: 1.3rem; }
+  .mesa-card__estado { background: #f0f0f0; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.85rem; font-weight: 600; }
+  .mesa-card__info p { margin: 0.5rem 0; color: #666; font-size: 0.9rem; }
+  .btn { display: block; padding: 0.75rem; border-radius: 8px; text-decoration: none; font-weight: 600; text-align: center; margin-top: 1rem; }
+  .btn-verde { background: #4CAF50; color: white; }
+  .btn-verde:hover { background: #45a049; }
+  .btn-bloque { width: 100%; }
+</style>
+{% endblock %}

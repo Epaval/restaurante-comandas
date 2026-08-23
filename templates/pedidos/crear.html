@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block titulo %}Nuevo pedido{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina">
+  <div>
+    <h1>Nuevo pedido</h1>
+    <p>Elija el tipo de pedido, la mesa o los datos del cliente.</p>
+  </div>
+</div>
+
+<div class="tarjeta" style="max-width:560px;">
+  <form method="post">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<ul class="errorlist">{% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+
+    <div class="campo">
+      <label>Tipo de pedido</label>
+      <div class="radio-tarjetas">
+        {% for radio in form.tipo %}
+          <label>{{ radio.tag }} {{ radio.choice_label }}</label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="campo">
+      <label for="{{ form.mesa.id_for_label }}">Mesa (solo para pedidos en el local)</label>
+      {{ form.mesa }}
+      <p class="ayuda">Solo se muestran mesas disponibles.</p>
+    </div>
+
+    <div class="campo">
+      <label for="{{ form.cliente_nombre.id_for_label }}">Nombre del cliente</label>
+      {{ form.cliente_nombre }}
+    </div>
+    <div class="fila-form">
+      <div class="campo">
+        <label for="{{ form.cliente_telefono.id_for_label }}">Teléfono</label>
+        {{ form.cliente_telefono }}
+      </div>
+      <div class="campo" style="flex:2;">
+        <label for="{{ form.cliente_direccion.id_for_label }}">Dirección (delivery)</label>
+        {{ form.cliente_direccion }}
+      </div>
+    </div>
+
+    <div class="campo">
+      <label for="{{ form.notas.id_for_label }}">Notas</label>
+      {{ form.notas }}
+    </div>
+
+    <button type="submit" class="btn btn-verde btn-bloque">Crear pedido y agregar productos</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block titulo %}Pedido #{{ pedido.id }}{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina">
+  <div>
+    <h1>Pedido #{{ pedido.id }}</h1>
+    <p>
+      <span class="chip-tipo {% if pedido.tipo == 'delivery' %}chip-delivery{% else %}chip-insitu{% endif %}">{{ pedido.get_tipo_display }}</span>
+      · {% if pedido.mesa %}Mesa {{ pedido.mesa.numero }}{% else %}{{ pedido.cliente_nombre|default:"Sin nombre" }}{% endif %}
+      · <span class="badge badge-gris">{{ pedido.get_estado_display }}</span>
+    </p>
+  </div>
+</div>
+
+<div class="rejilla rejilla-2">
+  <div class="tarjeta">
+    <h3>Productos del pedido</h3>
+    <div class="pila">
+      {% for item in pedido.items.all %}
+        <div class="linea-item">
+          <div>
+            <strong>{{ item.cantidad }}× {{ item.producto.nombre }}</strong>
+            {% if item.notas %}<div class="linea-item__notas">{{ item.notas }}</div>{% endif %}
+            <div><span class="badge badge-gris">{{ item.get_estado_display }}</span> · {{ item.producto.tiempo_preparacion }} min</div>
+          </div>
+          <div class="fila">
+            <span>${{ item.subtotal }}</span>
+            {% if pedido.estado == 'pendiente' %}
+            <form method="post" action="{% url 'pedidos:eliminar_item' item.id %}">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-outline" type="submit">Quitar</button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+      {% empty %}
+        <p class="vacio">Aún no se agregaron productos.</p>
+      {% endfor %}
+    </div>
+    <div class="total-linea"><span>Total</span><span>${{ pedido.total }}</span></div>
+
+    {% if pedido.estado == 'pendiente' %}
+    <form method="post" action="{% url 'pedidos:enviar_cocina' pedido.id %}" style="margin-top:1rem;">
+      {% csrf_token %}
+      <button class="btn btn-verde btn-bloque" type="submit">Enviar pedido a cocina</button>
+    </form>
+    {% endif %}
+
+    {% if pedido.estado == 'listo' or pedido.estado == 'entregado' %}
+      {% if user.es_caja or user.es_admin or user.is_superuser %}
+      <form method="post" action="{% url 'pedidos:procesar_pago' pedido.id %}" style="margin-top:1rem;">
+        {% csrf_token %}
+        <div class="fila-form">
+          <div class="campo">
+            <label for="{{ pago_form.monto.id_for_label }}">Monto cobrado</label>
+            {{ pago_form.monto }}
+          </div>
+          <div class="campo">
+            <label for="{{ pago_form.metodo.id_for_label }}">Método de pago</label>
+            {{ pago_form.metodo }}
+          </div>
+        </div>
+        <button class="btn btn-cobre btn-bloque" type="submit">Registrar pago</button>
+      </form>
+      {% endif %}
+    {% endif %}
+  </div>
+
+  <div class="tarjeta">
+    <h3>Agregar producto</h3>
+    {% if pedido.estado == 'pendiente' %}
+    <form method="post" action="{% url 'pedidos:agregar_item' pedido.id %}">
+      {% csrf_token %}
+      <div class="campo">
+        <label for="{{ item_form.producto.id_for_label }}">Producto</label>
+        {{ item_form.producto }}
+      </div>
+      <div class="fila-form">
+        <div class="campo">
+          <label for="{{ item_form.cantidad.id_for_label }}">Cantidad</label>
+          {{ item_form.cantidad }}
+        </div>
+        <div class="campo" style="flex:2;">
+          <label for="{{ item_form.notas.id_for_label }}">Notas (ej. sin cebolla)</label>
+          {{ item_form.notas }}
+        </div>
+      </div>
+      <button class="btn btn-verde btn-bloque" type="submit">Agregar al pedido</button>
+    </form>
+    {% else %}
+      <p class="ayuda">El pedido ya fue enviado a cocina; no se pueden agregar más productos desde aquí.</p>
+    {% endif %}
+
+    <h3 style="margin-top:1.5rem;">Menú disponible</h3>
+    {% for categoria in categorias %}
+      <p style="margin:0.6rem 0 0.2rem; font-weight:600;">{{ categoria.nombre }}</p>
+      <table>
+        <tbody>
+        {% for producto in categoria.productos.all %}
+          {% if producto.disponible %}
+          <tr>
+            <td>{{ producto.nombre }}</td>
+            <td>${{ producto.precio }}</td>
+            <td>{{ producto.tiempo_preparacion }} min</td>
+          </tr>
+          {% endif %}
+        {% endfor %}
+        </tbody>
+      </table>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,423 @@
+<!-- apps/mesas/templates/mesas/panel_limpieza.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Panel de Limpieza{% endblock %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <div class="encabezado-pagina">
+        <div>
+            <h1><i class="fas fa-broom"></i> Panel de Limpieza</h1>
+            <p class="text-muted">Mesas que están en proceso de limpieza</p>
+        </div>
+        <div>
+            <span class="badge bg-warning fs-6 p-2">
+                <i class="fas fa-clock"></i> {{ total_limpieza }} mesas en limpieza
+            </span>
+        </div>
+    </div>
+
+    {% if mesas %}
+        <div class="rejilla-mesas">
+            {% for mesa in mesas %}
+                <div class="mesa-tile estado-limpieza" data-mesa-id="{{ mesa.id }}">
+                    <div class="mesa-tile__contenido">
+                        <div class="mesa-tile__numero">{{ mesa.numero }}</div>
+                        <div class="mesa-tile__cap">
+                            <i class="fas fa-users"></i> {{ mesa.capacidad }} personas
+                        </div>
+                        
+                        <span class="badge badge-warning">
+                            <i class="fas fa-spinner fa-spin"></i> 
+                            {{ mesa.get_estado_display }}
+                        </span>
+                        
+                        {% if mesa.pedido %}
+                            <div class="mesa-tile__pedido">
+                                <small>
+                                    <i class="fas fa-receipt"></i> Pedido #{{ mesa.pedido.id }}
+                                </small>
+                                <small>
+                                    <i class="fas fa-dollar-sign"></i> ${{ mesa.pedido.total }}
+                                </small>
+                            </div>
+                        {% endif %}
+                        
+                        <button type="button" class="btn btn-success btn-bloque btn-limpiar" 
+                                data-mesa-id="{{ mesa.id }}"
+                                data-mesa-numero="{{ mesa.numero }}"
+                                data-pedido-id="{% if mesa.pedido %}{{ mesa.pedido.id }}{% else %}0{% endif %}">
+                            <i class="fas fa-check-circle"></i> Mesa Limpia
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i>
+            ¡No hay mesas en proceso de limpieza! Todas las mesas están disponibles.
+        </div>
+    {% endif %}
+
+    <!-- Acciones rápidas -->
+    <div class="mt-4">
+        <a href="{% url 'mesas:lista' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver a Mesas
+        </a>
+        <a href="{% url 'dashboard:inicio' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-home"></i> Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- ✅ MODAL MODERNO PARA CONFIRMAR LIMPIEZA -->
+<div id="modalLimpieza" class="modal-overlay" style="display: none;">
+    <div class="modal-container">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon">
+                    <i class="fas fa-broom"></i>
+                </div>
+                <h3>Confirmar Limpieza</h3>
+                <button class="modal-close" id="cerrarModalLimpieza">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-mesa-info">
+                    <div class="mesa-info-item">
+                        <span class="mesa-info-label">Mesa</span>
+                        <span class="mesa-info-value" id="modalMesaNumero">-</span>
+                    </div>
+                    <div class="mesa-info-item">
+                        <span class="mesa-info-label">Pedido</span>
+                        <span class="mesa-info-value" id="modalPedidoId">-</span>
+                    </div>
+                </div>
+                <p class="modal-mensaje">
+                    ¿Confirmas que la mesa <strong id="modalMesaNumeroTexto">-</strong> 
+                    ya está completamente limpia y disponible para nuevos clientes?
+                </p>
+                <div class="modal-avisos">
+                    <div class="aviso-item">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <span>La mesa quedará disponible</span>
+                    </div>
+                    <div class="aviso-item">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <span>El pedido se marcará como completado</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelarLimpieza">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <form method="post" id="formLimpieza" action="">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check-circle"></i> Sí, mesa limpia
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Estilos existentes ... */
+
+    /* ✅ ESTILOS DEL MODAL MODERNO */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .modal-container {
+        animation: slideUp 0.4s ease;
+        max-width: 480px;
+        width: 95%;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #4CAF50, #45a049);
+        padding: 1.5rem 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        position: relative;
+    }
+
+    .modal-icon {
+        background: rgba(255, 255, 255, 0.2);
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .modal-header h3 {
+        margin: 0;
+        color: white;
+        font-size: 1.3rem;
+        font-weight: 600;
+        flex: 1;
+    }
+
+    .modal-close {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .modal-close:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: rotate(90deg);
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .modal-mesa-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .mesa-info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .mesa-info-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: #888;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .mesa-info-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .mesa-info-value#modalMesaNumero {
+        color: #FF9800;
+        font-size: 1.3rem;
+    }
+
+    .modal-mensaje {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: #555;
+        margin-bottom: 1.5rem;
+    }
+
+    .modal-mensaje strong {
+        color: #FF9800;
+    }
+
+    .modal-avisos {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 1rem;
+        background: #f0f7f0;
+        border-radius: 10px;
+        border-left: 4px solid #4CAF50;
+    }
+
+    .aviso-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.9rem;
+        color: #333;
+    }
+
+    .aviso-item i {
+        font-size: 1rem;
+    }
+
+    .text-success {
+        color: #4CAF50;
+    }
+
+    .modal-footer {
+        padding: 1rem 2rem 2rem;
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        border-top: 1px solid #eee;
+    }
+
+    .modal-footer .btn {
+        padding: 0.6rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .modal-footer .btn-secondary {
+        background: #f1f3f5;
+        color: #666;
+    }
+
+    .modal-footer .btn-secondary:hover {
+        background: #e9ecef;
+    }
+
+    .modal-footer .btn-success {
+        background: linear-gradient(135deg, #4CAF50, #45a049);
+        color: white;
+        box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    }
+
+    .modal-footer .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from { 
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+        }
+        to { 
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 576px) {
+        .modal-mesa-info {
+            grid-template-columns: 1fr;
+        }
+        .modal-footer {
+            flex-direction: column;
+        }
+        .modal-footer .btn {
+            width: 100%;
+            justify-content: center;
+        }
+        .modal-header {
+            padding: 1rem;
+        }
+        .modal-body {
+            padding: 1.5rem;
+        }
+        .modal-footer {
+            padding: 1rem 1.5rem 1.5rem;
+        }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('modalLimpieza');
+    const formLimpieza = document.getElementById('formLimpieza');
+    const mesaNumero = document.getElementById('modalMesaNumero');
+    const mesaNumeroTexto = document.getElementById('modalMesaNumeroTexto');
+    const pedidoId = document.getElementById('modalPedidoId');
+    
+    const cerrarModal = document.getElementById('cerrarModalLimpieza');
+    const cancelarBtn = document.getElementById('cancelarLimpieza');
+
+    // Abrir modal al hacer clic en "Mesa Limpia"
+    document.querySelectorAll('.btn-limpiar').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const mesaId = this.dataset.mesaId;
+            const mesaNum = this.dataset.mesaNumero;
+            const pedidoIdVal = this.dataset.pedidoId;
+            
+            // Actualizar información en el modal
+            mesaNumero.textContent = mesaNum;
+            mesaNumeroTexto.textContent = mesaNum;
+            pedidoId.textContent = pedidoIdVal !== '0' ? '#' + pedidoIdVal : 'Sin pedido';
+            
+            // Actualizar action del formulario
+            formLimpieza.action = `/mesas/completar-limpieza/${mesaId}/`;
+            
+            // Mostrar modal
+            modal.style.display = 'flex';
+        });
+    });
+
+    // Cerrar modal
+    function cerrarModalFunc() {
+        modal.style.display = 'none';
+    }
+
+    cerrarModal.addEventListener('click', cerrarModalFunc);
+    cancelarBtn.addEventListener('click', cerrarModalFunc);
+
+    // Cerrar modal al hacer clic fuera
+    modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            cerrarModalFunc();
+        }
+    });
+
+    // Cerrar con tecla ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.style.display === 'flex') {
+            cerrarModalFunc();
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,194 @@
+<!-- apps/pedidos/templates/pedidos/procesar_pago.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Procesar Pago - Pedido #{{ pedido.id }}{% endblock %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-credit-card"></i> Procesar Pago
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Resumen del pedido -->
+                    <div class="pedido-resumen mb-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Pedido #{{ pedido.id }}</strong></p>
+                                <p class="mb-1">
+                                    <i class="fas fa-chair"></i> Mesa {{ pedido.mesa.numero }}
+                                </p>
+                                <p class="mb-1">
+                                    <i class="fas fa-user"></i> {{ pedido.cliente_nombre|default:"Sin cliente" }}
+                                </p>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <p class="mb-1"><strong>Total a pagar:</strong></p>
+                                <h2 class="text-success">${{ pedido.total }}</h2>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detalle de productos -->
+                    <div class="mb-4">
+                        <h6>Productos:</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th class="text-center">Cantidad</th>
+                                        <th class="text-end">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in pedido.items.all %}
+                                    <tr>
+                                        <td>{{ item.producto.nombre }}</td>
+                                        <td class="text-center">{{ item.cantidad }}</td>
+                                        <td class="text-end">${{ item.subtotal }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-active">
+                                        <th colspan="2" class="text-end">Total:</th>
+                                        <th class="text-end">${{ pedido.total }}</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Formulario de pago -->
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.metodo.id_for_label }}" class="form-label fw-bold">
+                                <i class="fas fa-wallet"></i> Método de Pago
+                            </label>
+                            {{ form.metodo }}
+                            {% if form.metodo.errors %}
+                                <div class="text-danger small">{{ form.metodo.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.monto.id_for_label }}" class="form-label fw-bold">
+                                <i class="fas fa-dollar-sign"></i> Monto
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                {{ form.monto }}
+                            </div>
+                            {% if form.monto.errors %}
+                                <div class="text-danger small">{{ form.monto.errors }}</div>
+                            {% endif %}
+                            <div class="form-text text-muted">
+                                Monto total a pagar: ${{ pedido.total }}
+                            </div>
+                        </div>
+
+                        {% if form.observaciones %}
+                        <div class="mb-3">
+                            <label for="{{ form.observaciones.id_for_label }}" class="form-label">
+                                Observaciones
+                            </label>
+                            {{ form.observaciones }}
+                        </div>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <a href="{% url 'pedidos:detalle' pedido.id %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-check-circle"></i> Confirmar Pago
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Información adicional -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <div class="alert alert-info mb-0">
+                        <i class="fas fa-info-circle"></i>
+                        Al confirmar el pago, la mesa quedará automáticamente en proceso de limpieza.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .pedido-resumen {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        border-left: 4px solid #28a745;
+    }
+    .card {
+        border-radius: 12px;
+        border: none;
+    }
+    .card-header {
+        border-radius: 12px 12px 0 0;
+    }
+    .table th {
+        border-top: none;
+    }
+    .table tfoot th {
+        border-top: 2px solid #dee2e6;
+        font-size: 1.1rem;
+    }
+    .btn-lg {
+        padding: 0.75rem 2rem;
+        font-size: 1.1rem;
+    }
+    .form-control, .form-select {
+        border-radius: 8px;
+    }
+    .input-group .form-control {
+        border-radius: 0 8px 8px 0;
+    }
+    .input-group .input-group-text {
+        border-radius: 8px 0 0 8px;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mostrar el monto total automáticamente
+    const montoInput = document.querySelector('input[name="monto"]');
+    const total = {{ pedido.total }};
+    
+    if (montoInput && !montoInput.value) {
+        montoInput.value = total.toFixed(2);
+    }
+    
+    // Validar que el monto no sea menor al total
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            if (montoInput) {
+                const monto = parseFloat(montoInput.value);
+                if (monto < total) {
+                    e.preventDefault();
+                    alert('El monto no puede ser menor al total del pedido ($' + total.toFixed(2) + ')');
+                    return false;
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
