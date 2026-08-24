@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 
-
 try:
     from dotenv import load_dotenv
     load_dotenv()
@@ -75,9 +74,6 @@ DATABASES = {
     }
 }
 
-
-USE_TZ = False 
-
 AUTH_USER_MODEL = "accounts.Usuario"
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -93,7 +89,7 @@ LANGUAGES = [
 ]
 
 # Zona horaria de Venezuela
-TIME_ZONE = "America/Caracas"  # Venezuela Standard Time (VET)
+TIME_ZONE = "America/Caracas"
 USE_I18N = True
 USE_TZ = True  # Mantener True para fechas con zona horaria
 
@@ -102,9 +98,21 @@ DATE_FORMAT = 'd/m/Y'
 DATETIME_FORMAT = 'd/m/Y H:i:s'
 DATE_INPUT_FORMATS = ['%d/%m/%Y', '%d-%m-%Y']
 
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "dashboard:inicio"
+LOGOUT_REDIRECT_URL = "login"
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# ==========================================
+# CONFIGURACIÓN DE ARCHIVOS ESTÁTICOS Y MULTIMEDIA (LIMPIA Y ÚNICA)
+# ==========================================
+
+# Archivos estáticos (CSS, JS, imágenes del diseño)
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
 # Configuración de almacenamiento (Django 4.2+)
 STORAGES = {
     "default": {
@@ -119,20 +127,6 @@ STORAGES = {
     },
 }
 
-
-LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "dashboard:inicio"
-LOGOUT_REDIRECT_URL = "login"
-
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-# Configuración de archivos multimedia (imágenes)
+# Archivos multimedia (imágenes subidas por el usuario)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
-
-# Configuración de archivos estáticos
-STATIC_URL = "static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = BASE_DIR / "staticfiles"
-
-WHITENOISE_ROOTS = [MEDIA_ROOT] if not DEBUG else []
