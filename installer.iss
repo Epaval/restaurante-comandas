@@ -1,11 +1,11 @@
 [Setup]
 AppName=RestauranteApp
-AppVersion=1.0.24
+AppVersion=1.0.25
 AppPublisher=FACDIN
 DefaultDirName={autopf}\Restaurante
 DefaultGroupName=FACDIN Restaurante
 OutputDir=instalador
-OutputBaseFilename=FACDIN-Restaurante-Setup-1.0.24
+OutputBaseFilename=FACDIN-Restaurante-Setup-1.0.25
 Compression=lzma2/max
 SolidCompression=yes
 PrivilegesRequired=lowest
