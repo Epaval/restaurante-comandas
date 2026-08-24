@@ -57,7 +57,7 @@ def main():
         base_dir = get_base_dir()
         app_data_dir = get_app_data_dir()
         sys.path.insert(0, str(base_dir))
-        os.environ.setdefault('DJANGO_DEBUG', 'False')
+        os.environ.setdefault('DJANGO_DEBUG', 'True')
         os.environ.setdefault('ALLOWED_HOSTS', 'localhost,127.0.0.1,*')
 
         from django.core.management import execute_from_command_line
